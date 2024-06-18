@@ -1,0 +1,27 @@
+{# dashboard.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<div class="kanban-board">
+    <div class="kanban-column">
+        <div class="kanban-column-header">To-Do</div>
+        <div class="kanban-column-body">
+            <!-- Cards for To-Do tasks -->
+        </div>
+    </div>
+    <div class="kanban-column">
+        <div class="kanban-column-header">In Progress</div>
+        <div class="kanban-column-body">
+            <!-- Cards for In Progress tasks -->
+        </div>
+    </div>
+    <div class="kanban-column">
+        <div class="kanban-column-header">Done</div>
+        <div class="kanban-column-body">
+            <!-- Cards for Done tasks -->
+        </div>
+    </div>
+</div>
+{% endblock %}
