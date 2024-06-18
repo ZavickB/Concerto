@@ -1,0 +1,140 @@
+{# templates/project/_idea_comments_modal.html.twig #}
+{% block modalBody %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h5>{{ idea.title }}</h5>
+                <p>{{ idea.description }}</p>
+                <p><strong>Owner:</strong> {{ idea.owner.username }}</p>
+            </div>
+        </div>
+        
+        <hr>
+
+        <h5>Comments</h5>
+
+        {# Function to render top-level comments #}
+        {% macro renderTopLevelComments(comments) %}
+            {% for comment in comments %}
+                {% if comment.parentComment is empty %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <!-- Render top-level comment content -->
+                            <div class="comment-header">
+                                <strong>{{ comment.owner.username }}</strong>
+                                <span class="text-muted ml-2">{{ comment.postDate|date('Y-m-d H:i') }}</span>
+                            </div>
+                            <p>{{ comment.content }}</p>
+                        </div>
+                        <!-- Button for replying to the comment -->
+                        <div class="card-footer">
+                            <button class="btn btn-sm btn-primary reply-btn" data-parent="{{ comment.id }}" data-parent-owner="{{ comment.owner.username }}">
+                                Reply
+                            </button>
+                        </div>
+                        <!-- Check and render child comments -->
+                        {% if comment.childComments is not empty %}
+                            <div class="card-footer">
+                                {{ _self.renderChildComments(comment.childComments) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endmacro %}
+
+        {# Function to recursively render child comments #}
+        {% macro renderChildComments(children) %}
+            {% for child in children %}
+                <div class="card mb-3 ml-3"> {# Adjust margin for indentation #}
+                    <div class="card-body">
+                        <!-- Render child comment content -->
+                        <div class="comment-header">
+                            <strong>{{ child.owner.username }}</strong>
+                            <span class="text-muted ml-2">{{ child.postDate|date('Y-m-d H:i') }}</span>
+                        </div>
+                        <p>{{ child.content }}</p>
+                    </div>
+                    <!-- Button for replying to the child comment -->
+                    <div class="card-footer">
+                        <button class="btn btn-sm btn-primary reply-btn" data-parent="{{ child.id }}" data-parent-owner="{{ child.owner.username }}">
+                            Reply
+                        </button>
+                    </div>
+                    <!-- Recursively render nested child comments -->
+                    {% if child.childComments is not empty %}
+                        <div class="card-footer">
+                            {{ _self.renderChildComments(child.childComments) }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endmacro %}
+
+        {# Initial call to renderTopLevelComments macro with top-level comments #}
+        {{ _self.renderTopLevelComments(idea.comments) }}
+
+        <hr>
+
+        {# Form for adding a new comment #}
+        <form id="commentForm" action="{{ path('comment_add', {'id': idea.id}) }}" method="POST">
+            {{ form_widget(form._token) }}
+            {{ form_widget(form.parentComment) }} {# Include hidden field for parent comment ID #}
+            <div class="form-group">
+                <label for="commentContent">Add a Comment:</label>
+                {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': '3', 'id': 'commentContent'}}) }}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+    </div>
+
+    <style>
+        /* Custom CSS styles for comment display */
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .comment-header {
+            margin-bottom: 10px;
+        }
+        .comment-header strong {
+            font-weight: bold;
+        }
+        .comment-header .text-muted {
+            color: #6c757d;
+        }
+        .reply-btn {
+            margin-left: auto; /* Push reply button to the right */
+        }
+    </style>
+
+    <script>
+        $(function() {
+            $(document).on('click', '.reply-btn', function() {
+                var parentId = $(this).data('parent');
+                var parentOwner = $(this).data('parent-owner');
+                console.log('Reply button clicked for parent ID:', parentId);
+
+                $('#comment_content').val(''); // Clear previous content
+                console.log('Cleared comment content.');
+
+                $('#comment_content').focus();
+                console.log('Focused on comment textarea.');
+
+                $('#comment_content').val('@' + parentOwner + ' '); // Pre-fill with parent comment owner
+                console.log('Pre-filled comment content with parent owner:', parentOwner);
+
+                // Set the parentComment hidden field value
+                $('#comment_parentComment').val(parentId);
+                console.log('Set parentComment hidden field value:', parentId);
+
+                
+            });
+        });
+    </script>
+{% endblock %}

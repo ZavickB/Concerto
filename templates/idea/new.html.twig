@@ -1,0 +1,42 @@
+
+
+{% block body %}
+    <h1>{{ project.title }} - Add Task</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <!-- Form for adding a new idea -->
+            <div class="card">
+                <div class="card-body">
+                    {{ form_start(form, { 'attr': {'action': path('project_add_idea', {'status': 'to-do', 'id': project.id}), 'method': 'POST'} }) }}
+                    
+                    <div class="form-group">
+                        {{ form_label(form.title) }}
+                        {{ form_widget(form.title, { 'attr': {'class': 'form-control'} }) }}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description, { 'attr': {'class': 'form-control'} }) }}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.tags) }}
+                        {{ form_widget(form.tags, { 'attr': {'class': 'form-control', 'multiple': 'multiple'} }) }}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.status) }}
+                        {{ form_widget(form.status, { 'attr': {'class': 'form-control'} }) }}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_widget(form.save, { 'attr': {'class': 'btn btn-primary'} }) }}
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
