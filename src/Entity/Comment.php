@@ -29,6 +29,7 @@ class Comment
      */
     private $postDate;
 
+
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
@@ -36,6 +37,7 @@ class Comment
     private $owner;
 
     /**
+
      * @ORM\ManyToOne(targetEntity=Idea::class, inversedBy="comments")
      */
     private $idea;

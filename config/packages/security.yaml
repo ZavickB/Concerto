@@ -6,11 +6,11 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
-
     firewalls:
         main:
             custom_authenticators:
                 - App\Security\GoogleAuthenticator
+                - App\Security\GithubAuthenticator
             logout:
                 path: app_logout
                 target: /
