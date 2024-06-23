@@ -50,22 +50,35 @@ class GoogleAuthenticator extends AbstractAuthenticator
             $user = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleId]);
 
             if (!$user) {
-                $random = sha1(random_bytes(18));
+                // Vérifiez si un utilisateur avec le même email existe déjà
+                $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
-                $user = new User();
+                if (!$user) {
+                    $random = sha1(random_bytes(18));
+
+                    $user = new User();
+                    $user->setEmail($email);
+                    $user->setUsername($googleUser->getName());
+                    $user->setPassword($random);
+                }
+
+                // Liez l'utilisateur existant ou nouvel utilisateur avec le googleId
                 $user->setGoogleId($googleId);
-                $user->setEmail($email);
-                $user->setUsername($googleUser->getName());
-                $user->setPassword($random);
 
-                $newProject = new Project();
-                $newProject
-                    ->setTitle("Your first Project")
-                    ->setDescription("This is a simple description of your first project")
-                    ->setOwner($user);
-                    
+                if (!$user->getId()) {
+                    $newProject = new Project();
+                    $newProject
+                        ->addContributor($user)
+                        ->setTitle("Your first Project")
+                        ->setDescription("This is a simple description of your first project")
+                        ->setOwner($user)
+                        ->setStartDate(new \DateTime());
+
+                        
+                    $this->entityManager->persist($newProject);
+                }
+
                 $this->entityManager->persist($user);
-                $this->entityManager->persist($newProject);
                 $this->entityManager->flush();
             }
 

@@ -45,6 +45,11 @@ class Project
      */
     private $contributors;
 
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $startDate;
+
     public function __construct()
     {
         $this->ideas = new ArrayCollection();
@@ -142,6 +147,18 @@ class Project
     public function removeContributor(User $contributor): self
     {
         $this->contributors->removeElement($contributor);
+
+        return $this;
+    }
+
+    public function getStartDate(): ?\DateTimeInterface
+    {
+        return $this->startDate;
+    }
+
+    public function setStartDate(\DateTimeInterface $startDate): self
+    {
+        $this->startDate = $startDate;
 
         return $this;
     }

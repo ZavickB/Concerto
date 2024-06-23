@@ -21,7 +21,7 @@ class GitHubController extends AbstractController
         return $clientRegistry
             ->getClient('github') // key used in config/packages/knpu_oauth2_client.yaml
             ->redirect([
-                'public_profile', 'email' // the scopes you want to access
+                'state', 'user','user:email'// the scopes you want to access
             ]);
     }
 
