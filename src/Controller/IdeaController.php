@@ -10,9 +10,27 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class IdeaController extends AbstractController
 {
+    /**
+     * @Route("/idea/{id}/edit", name="idea_edit")
+     */
+    public function editIdea($id, IdeaRepository $ideaRepository): Response
+    {
+        $idea = $ideaRepository->find($id);
+
+        if (! $idea || $idea->getOwner() !== $this->getUser()) {
+            throw new AccessDeniedException("You're not the owner of this idea, you can't edit it!");
+        }
+
+        // Handle idea editing logic here
+
+        // Example: return a response or redirect
+        return $this->redirectToRoute('project_view', ['id' => $idea->getProject()->getId()]);
+    }
+
     /**
      * @Route("/idea/{id}/comments", name="idea_comments", methods={"GET"})
      */
@@ -30,7 +48,7 @@ class IdeaController extends AbstractController
         ]);
     }
 
-   /**
+    /**
      * @Route("/idea/{id}/comment/add", name="comment_add", methods={"POST"})
      */
     public function addComment($id, Request $request, IdeaRepository $ideaRepository, EntityManagerInterface $entityManager): Response
@@ -49,22 +67,21 @@ class IdeaController extends AbstractController
 
         // Handle form submission
         if ($form->isSubmitted() && $form->isValid()) {
-            // Fetch the idea or parent comment ID from the request
+            // Fetch the parent comment ID from the request
             $parentCommentId = $request->request->get('comment')['parentComment'];
 
             // Set the parent comment (if provided)
             if ($parentCommentId) {
-                // Fetch parent comment from database or other source
-                $parentComment = $this->getDoctrine()->getRepository(Comment::class)->find($parentCommentId);
+                $parentComment = $entityManager->getRepository(Comment::class)->find($parentCommentId);
                 if ($parentComment) {
                     $comment->setParentComment($parentComment);
-                } 
+                }
             }
 
             $entityManager->persist($comment);
             $entityManager->flush();
 
-            // Redirect back to the idea comments modal or handle as needed
+            // Redirect back to the idea view or handle as needed
             return $this->redirectToRoute('project_view', ['id' => $idea->getProject()->getId()]);
         }
 

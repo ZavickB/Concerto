@@ -1,0 +1,22 @@
+{# templates/project/_comment_list.html.twig #}
+{% for comment in comments %}
+    <div class="comment mb-3 nested-comment" style="margin-left: {{ level * 20 }}px; border-left: 3px solid #ccc;" id="comment-{{ comment.id }}">
+        <div class="comment-header d-flex align-items-center">
+            <img src="{{ asset('images/concerto.png') }}" alt="{{ comment.owner.username }}" class="rounded-circle mr-2" style="width: 40px; height: 40px;">
+            <div>
+                <strong>{{ comment.owner.username }}</strong>
+                <span class="text-muted ml-2">{{ comment.postDate|date('F j, Y, H:i') }}</span>
+            </div>
+        </div>
+        <p>{{ comment.content }}</p>
+        <a href="javascript:void(0);" class="reply-link text-primary" data-parent="{{ comment.id }}" data-parent-owner="{{ comment.owner.username }}">
+            Reply
+        </a>
+        {% if comment.childComments is not empty %}
+            <button class="btn btn-sm btn-link toggle-replies-btn" data-target="#replies-{{ comment.id }}" data-parent="{{ comment.id }}">
+                View {{ comment.childComments|length }} {{ comment.childComments|length == 1 ? 'reply' : 'replies' }}
+            </button>
+            <div id="replies-{{ comment.id }}" class="replies collapse"></div>
+        {% endif %}
+    </div>
+{% endfor %}

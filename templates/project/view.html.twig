@@ -5,69 +5,30 @@
     {% include 'project/_project_header.html.twig' %}
 
     <div class="row mt-4">
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">To Do</h4>
-                    <a href="#" class="modalbox btn btn-primary btn-sm"
-                        data-toggle="modal"
-                        data-target="#ideaModal"
-                        data-content-url="{{ path('project_add_idea', {'status': 'to-do', 'id': project.id}) }}">
-                        <i class="bi bi-plus"></i> 
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% for idea in project.ideas %}
-                        {% if idea.status.name == 'to-do' %}
-                            {% include 'project/_idea_card.html.twig' with { 'idea': idea } %}
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">In Progress</h4>
+        {% for status, status_label in {'to-do': 'To Do', 'in-progress': 'In Progress', 'done': 'Done'} %}
+            <div class="col-md-4">
+                <div class="card mb-4 border-left-{{ status }}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="card-title">{{ status_label }}</h4>
                         <a href="#" class="modalbox btn btn-primary btn-sm"
-                        data-toggle="modal"
-                        data-target="#ideaModal"
-                        data-content-url="{{ path('project_add_idea', {'status':'in-progress','id': project.id}) }}">
-                        <i class="bi bi-plus"></i> 
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% for idea in project.ideas %}
-                        {% if idea.status.name == 'in-progress' %}
-                            {% include 'project/_idea_card.html.twig' with { 'idea': idea } %}
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">Done</h4>
-                    <a href="#" class="modalbox btn btn-primary btn-sm"
-                        data-toggle="modal"
-                        data-target="#ideaModal"
-                        data-content-url="{{ path('project_add_idea', {'status': 'done', 'id': project.id}) }}">
-                        <i class="bi bi-plus"></i> 
-                    </a>
-                </div>
-                <div class="card-body">
-                    {% for idea in project.ideas %}
-                        {% if idea.status.name == 'done' %}
-                            {% include 'project/_idea_card.html.twig' with { 'idea': idea } %}
-                        {% endif %}
-                    {% endfor %}
+                            data-toggle="modal"
+                            data-target="#ideaModal"
+                            data-content-url="{{ path('project_add_idea', {'status': status, 'id': project.id}) }}">
+                            <i class="bi bi-plus"></i> 
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% for idea in project.ideas %}
+                            {% if idea.status.name == status %}
+                                {% include 'project/_idea_card.html.twig' with { 'idea': idea } %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endfor %}
     </div>
+
     <div class="modal fade" id="ideaModal" tabindex="-1" role="dialog" aria-labelledby="ideaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -97,4 +58,26 @@
         </div>
     </div>
 
+
+<style>
+    .border-left-to-do {
+        border-left: 4px solid #ffc107;
+    }
+    .border-left-in-progress {
+        border-left: 4px solid #17a2b8;
+    }
+    .border-left-done {
+        border-left: 4px solid #28a745;
+    }
+    .card {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .card-title {
+        margin-bottom: 0;
+    }
+</style>
 {% endblock %}

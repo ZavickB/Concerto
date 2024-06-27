@@ -1,4 +1,3 @@
-{# templates/project/_idea_comments_modal.html.twig #}
 {% block modalBody %}
     <div class="container">
         <div class="row">
@@ -13,94 +12,64 @@
 
         <h5>Comments</h5>
 
-        {# Function to render top-level comments #}
-        {% macro renderTopLevelComments(comments) %}
+        {% macro renderComments(comments, level) %}
             {% for comment in comments %}
-                {% if comment.parentComment is empty %}
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <!-- Render top-level comment content -->
-                            <div class="comment-header">
+                {% if level == 0 and comment.parentComment is empty %}
+                    <div class="comment mb-3" style="margin-left: {{ level * 20 }}px; border-left: 3px solid #ccc;" id="comment-{{ comment.id }}">
+                        <div class="comment-header d-flex align-items-center">
+                            <img src="{{ asset('images/concerto.png') }}" alt="{{ comment.owner.username }}" class="rounded-circle mr-2" style="width: 40px; height: 40px;">
+                            <div>
                                 <strong>{{ comment.owner.username }}</strong>
-                                <span class="text-muted ml-2">{{ comment.postDate|date('Y-m-d H:i') }}</span>
+                                <span class="text-muted ml-2">{{ comment.postDate|date('F j, Y, H:i') }}</span>
                             </div>
-                            <p>{{ comment.content }}</p>
                         </div>
-                        <!-- Button for replying to the comment -->
-                        <div class="card-footer">
-                            <button class="btn btn-sm btn-primary reply-btn" data-parent="{{ comment.id }}" data-parent-owner="{{ comment.owner.username }}">
+                        <p>{{ comment.content }}</p>
+                        <div class="d-flex align-items-center">
+                            <a href="javascript:void(0);" class="reply-link text-primary mr-3" data-parent="{{ comment.id }}" data-parent-owner="{{ comment.owner.username }}">
                                 Reply
-                            </button>
+                            </a>
+                            {% if comment.childComments is not empty %}
+                                <button class="btn btn-sm btn-link toggle-replies-btn" data-target="#replies-{{ comment.id }}" data-parent="{{ comment.id }}">
+                                    View {{ comment.childComments|length }} {{ comment.childComments|length == 1 ? 'reply' : 'replies' }}
+                                </button>
+                            {% endif %}
                         </div>
-                        <!-- Check and render child comments -->
                         {% if comment.childComments is not empty %}
-                            <div class="card-footer">
-                                {{ _self.renderChildComments(comment.childComments) }}
-                            </div>
+                            <div id="replies-{{ comment.id }}" class="replies collapse"></div>
                         {% endif %}
                     </div>
                 {% endif %}
             {% endfor %}
         {% endmacro %}
 
-        {# Function to recursively render child comments #}
-        {% macro renderChildComments(children) %}
-            {% for child in children %}
-                <div class="card mb-3 ml-3"> {# Adjust margin for indentation #}
-                    <div class="card-body">
-                        <!-- Render child comment content -->
-                        <div class="comment-header">
-                            <strong>{{ child.owner.username }}</strong>
-                            <span class="text-muted ml-2">{{ child.postDate|date('Y-m-d H:i') }}</span>
-                        </div>
-                        <p>{{ child.content }}</p>
-                    </div>
-                    <!-- Button for replying to the child comment -->
-                    <div class="card-footer">
-                        <button class="btn btn-sm btn-primary reply-btn" data-parent="{{ child.id }}" data-parent-owner="{{ child.owner.username }}">
-                            Reply
-                        </button>
-                    </div>
-                    <!-- Recursively render nested child comments -->
-                    {% if child.childComments is not empty %}
-                        <div class="card-footer">
-                            {{ _self.renderChildComments(child.childComments) }}
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% endmacro %}
-
-        {# Initial call to renderTopLevelComments macro with top-level comments #}
-        {{ _self.renderTopLevelComments(idea.comments) }}
+        {{ _self.renderComments(idea.comments, 0) }}
 
         <hr>
 
-        {# Form for adding a new comment #}
-        <form id="commentForm" action="{{ path('comment_add', {'id': idea.id}) }}" method="POST">
-            {{ form_widget(form._token) }}
-            {{ form_widget(form.parentComment) }} {# Include hidden field for parent comment ID #}
-            <div class="form-group">
-                <label for="commentContent">Add a Comment:</label>
-                {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': '3', 'id': 'commentContent'}}) }}
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-
+        <div id="formContainer">
+            <form id="commentForm" class="mb-3" action="{{ path('comment_add', {'id': idea.id}) }}" method="POST">
+                {{ form_widget(form._token) }}
+                {{ form_widget(form.parentComment) }}
+                <div class="form-group">
+                    <label for="commentContent">Add a Comment:</label>
+                    {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': '3', 'id': 'commentContent'}}) }}
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
     </div>
 
     <style>
-        /* Custom CSS styles for comment display */
-        .card {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 15px;
-        }
-        .card-body {
-            padding: 15px;
+        .comment {
+            border-left: 2px solid #ccc;
+            padding-left: 15px;
+            padding-bottom: 10px;
         }
         .comment-header {
             margin-bottom: 10px;
+        }
+        .comment-header img {
+            border-radius: 50%;
         }
         .comment-header strong {
             font-weight: bold;
@@ -108,32 +77,67 @@
         .comment-header .text-muted {
             color: #6c757d;
         }
-        .reply-btn {
-            margin-left: auto; /* Push reply button to the right */
+        .reply-link {
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        .reply-form {
+            margin-top: 10px;
+            margin-left: 20px; /* Indent reply form */
+        }
+        .replies {
+            margin-top: 10px;
+            margin-left: 20px;
+        }
+        .toggle-replies-btn {
+            color: #007bff;
+            cursor: pointer;
         }
     </style>
 
     <script>
         $(function() {
-            $(document).on('click', '.reply-btn', function() {
+            // Click event for reply links
+            $(document).on('click', '.reply-link', function() {
                 var parentId = $(this).data('parent');
                 var parentOwner = $(this).data('parent-owner');
-                console.log('Reply button clicked for parent ID:', parentId);
-
-                $('#comment_content').val(''); // Clear previous content
-                console.log('Cleared comment content.');
-
-                $('#comment_content').focus();
-                console.log('Focused on comment textarea.');
-
-                $('#comment_content').val('@' + parentOwner + ' '); // Pre-fill with parent comment owner
-                console.log('Pre-filled comment content with parent owner:', parentOwner);
-
-                // Set the parentComment hidden field value
+                console.log("parentOwner : " + parentOwner);
                 $('#comment_parentComment').val(parentId);
-                console.log('Set parentComment hidden field value:', parentId);
-
                 
+                // Move form under the comment where reply was clicked
+                var commentDiv = $(this).closest('.comment');
+                $('#formContainer').insertAfter(commentDiv);
+
+            });
+
+            // Click event for toggle replies buttons
+            $(document).on('click', '.toggle-replies-btn', function() {
+                var target = $(this).data('target');
+                var parentId = $(this).data('parent');
+                var targetDiv = $(target);
+                if (targetDiv.children().length === 0) {
+                    $.ajax({
+                        url: "{{ path('fetch_comments', {'id': idea.id}) }}",
+                        method: "GET",
+                        data: { parentId: parentId },
+                        success: function(data) {
+                            targetDiv.html(data);
+                            targetDiv.toggleClass('collapse');
+                            if (targetDiv.hasClass('collapse')) {
+                                $(this).text('View replies');
+                            } else {
+                                $(this).text('Hide replies');
+                            }
+                        }
+                    });
+                } else {
+                    targetDiv.toggleClass('collapse');
+                    if (targetDiv.hasClass('collapse')) {
+                        $(this).text('View replies');
+                    } else {
+                        $(this).text('Hide replies');
+                    }
+                }
             });
         });
     </script>
