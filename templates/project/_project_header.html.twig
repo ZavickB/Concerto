@@ -1,9 +1,12 @@
-{# _project_header.html.twig #}
+{# templates/project/_project_header.html.twig #}
 
 <div class="row mt-10">
     <div class="col-md-8">
         <h1>{{ project.title }}</h1>
         <p>{{ project.description }}</p>
+        <button type="button" class="btn btn-secondary modalbox-edit-project" id="editProjectBtn" data-toggle="modal" data-target="#modal" data-content-url="{{ path('project_edit', {'id': project.id}) }}"> 
+            <i class="fas fa-edit"></i> Edit
+        </button>
     </div>
 
     <div class="col-md-4">

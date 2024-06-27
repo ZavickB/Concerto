@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\Idea;
 use App\Form\IdeaType;
 use App\Entity\Project;
+use App\Form\ProjectType;
 use App\Repository\IdeaRepository;
 use App\Repository\StatusRepository;
 use App\Repository\ProjectRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +18,36 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ProjectController extends AbstractController
 {
-   
+    /**
+     * @Route("/projects/new", name="project_new", methods={"GET", "POST"})
+     */
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $project = new Project();
+
+        // Create a form to handle the submission
+        $form = $this->createForm(ProjectType::class, $project);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $project->setOwner($this->getUser());
+            $project->setStartDate(new \DateTime());
+
+            $entityManager->persist($project);
+            $entityManager->flush();
+
+            // Redirect back to the project view or handle as needed
+            return $this->redirectToRoute('project_view', ['id' => $project->getId()]);
+        }
+
+        return $this->render('project/_form.html.twig', [
+            'project' => $project,
+            'form' => $form->createView(),
+            'form_action' => $this->generateUrl('project_new')
+        ]);
+    }
+
+
     /**
      * @Route("/projects/{id}", name="project_view", methods={"GET"})
      */
@@ -30,9 +61,39 @@ class ProjectController extends AbstractController
     }
 
     /**
+     * @Route("/projects/{id}/edit", name="project_edit", methods={"GET", "POST"})
+     */
+    public function edit($id, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $project = $entityManager->getRepository(Project::class)->find($id);
+
+        // Handle the case where the project is not found
+        if (!$project) {
+            throw $this->createNotFoundException('The project does not exist');
+        }
+
+        // Create a form to handle the submission
+        $form = $this->createForm(ProjectType::class, $project);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            // Redirect back to the project view or handle as needed
+            return $this->redirectToRoute('project_view', ['id' => $project->getId()]);
+        }
+
+        return $this->render('project/_form.html.twig', [
+            'project' => $project,
+            'form' => $form->createView(),
+            'form_action' => $this->generateUrl('project_edit', ['id' => $project->getId()])
+        ]);
+    }
+
+    /**
      * @Route("/projects/{id}/addIdea", name="project_add_idea", methods={"GET", "POST"})
      */
-    public function new($id, Request $request, ProjectRepository $projectRepository, StatusRepository $statusRepository): Response
+    public function addIdea($id, Request $request, ProjectRepository $projectRepository, StatusRepository $statusRepository): Response
     {
         $status_name = $request->get('status');
         $status = $statusRepository->findOneBy(['name' => $status_name]);

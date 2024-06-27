@@ -10,7 +10,7 @@
                 <div class="card mb-4 border-left-{{ status }} card-column" data-status="{{status}}">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title">{{ status_label }}</h4>
-                        <a href="#" class="modalbox btn btn-primary btn-sm"
+                        <a href="#" class="modalbox btn btn-secondary btn-sm"
                             data-toggle="modal"
                             data-target="#ideaModal"
                             data-content-url="{{ path('project_add_idea', {'status': status, 'id': project.id}) }}">
@@ -42,6 +42,15 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-body">
                 <div id="commentsModalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editProjectModal" tabindex="-1" role="dialog" aria-labelledby="editProjectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="editProjectModalContent">
+                </div>
             </div>
         </div>
     </div>

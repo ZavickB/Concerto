@@ -19,12 +19,33 @@ $(document).ready(function() {
         });
     });
 
+    // New Project Modal
+    $('.modalbox-project').on('click', function(event) {
+        event.preventDefault();
+        var contentUrl = $(this).data('content-url');
+        $('#projectModal').modal('show');
+        $('#projectModalContent').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+        $.get(contentUrl, function(data) {
+            $('#projectModalContent').html(data);
+        });
+    });
+
+    // New Project Modal
+    $('.modalbox-edit-project').on('click', function(event) {
+        event.preventDefault();
+        var contentUrl = $(this).data('content-url');
+        $('#editProjectModal').modal('show');
+        $('#editProjectModalContent').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+        $.get(contentUrl, function(data) {
+            $('#editProjectModalContent').html(data);
+        });
+    });
+
     // Ensure only one modal is shown at a time
     $('.modal').on('hidden.bs.modal', function() {
         $('.modal').modal('hide');
     });
 });
-
 
 // Handle form submission inside modal
 $('#ideaModal').on('submit', 'form', function(event) {
@@ -56,3 +77,4 @@ $('#ideaModal').on('submit', 'form', function(event) {
         }
     });
 });
+

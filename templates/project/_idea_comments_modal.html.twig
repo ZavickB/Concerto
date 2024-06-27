@@ -50,20 +50,21 @@
                 {{ _self.renderComments(idea.comments, 0) }}
 
                 <hr>
-
-                <div id="formContainer">
-                    <form id="commentForm" class="mb-3" action="{{ path('comment_add', {'id': idea.id}) }}" method="POST">
-                        {{ form_widget(form._token) }}
-                        {{ form_widget(form.parentComment) }}
-                        <div class="form-group">
-                            <label for="commentContent">Add a Comment:</label>
-                            {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': '3', 'id': 'commentContent'}}) }}
-                        </div>
-                        <div class="text-right">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelForm" style="display: none;">Cancel</button>
-                            <button type="submit" class="btn btn-primary btn-sm ml-2">Submit</button>
-                        </div>
-                    </form>
+                <div id="comment-form-container">
+                    <div id="formContainer">
+                        <form id="commentForm" class="mb-3" action="{{ path('comment_add', {'id': idea.id}) }}" method="POST">
+                            {{ form_widget(form._token) }}
+                            {{ form_widget(form.parentComment) }}
+                            <div class="form-group">
+                                <label for="commentContent">Add a Comment:</label>
+                                {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': '3', 'id': 'commentContent'}}) }}
+                            </div>
+                            <div class="text-right">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelForm" style="display: none;">Cancel</button>
+                                <button type="submit" class="btn btn-primary btn-sm ml-2">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -93,7 +94,7 @@
                 $('#commentForm')[0].reset();
 
                 // Move form back to original position
-                $('#formContainer').appendTo('.container'); // Adjust as per your container selector
+                $('#formContainer').appendTo('#comment-form-container'); // Adjust as per your container selector
                 $('#commentForm button[type="submit"]').show();
                 $('#cancelForm').hide();
             });

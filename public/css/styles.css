@@ -113,6 +113,42 @@ main {
     border: 1px solid var(--color-orange); /* Adjust border width and color as needed */
 }
 
+.project-card {
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-orange); /* Adjust border width and color as needed */
+}
+
+.project-card {
+    height: 15vh; /* Adjust this value as needed */
+    overflow: hidden; /* Hide overflow */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.project-card .card-body {
+    flex-grow: 1;
+}
+
+.project-card .card-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.project-card .card-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+}
+
+
 .idea-card .card-body {
     padding: 1rem;
 }
