@@ -17,8 +17,6 @@
                 
                 <hr>
                 
-                <h6>Comments</h6>
-
                 {% macro renderComments(comments, level) %}
                     {% for comment in comments %}
                         {% if level == 0 and comment.parentComment is empty %}
