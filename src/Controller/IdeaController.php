@@ -2,14 +2,16 @@
 
 namespace App\Controller;
 
+use App\Entity\Idea;
+use App\Entity\Status;
 use App\Entity\Comment;
 use App\Form\CommentType;
 use App\Repository\IdeaRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class IdeaController extends AbstractController
@@ -89,4 +91,28 @@ class IdeaController extends AbstractController
         // For simplicity, return a JSON response or render a template
         return new Response('Error handling comment submission.', Response::HTTP_BAD_REQUEST);
     }
+
+    /**
+     * @Route("/update-idea-status", name="update_idea_status", methods={"PATCH"})
+     */
+    public function updateIdeaStatus(Request $request): Response
+    {
+        $ideaId = $request->request->get('ideaId');
+        $newStatus = $request->request->get('newStatus');
+        
+        $entityManager = $this->getDoctrine()->getManager();
+        $idea = $entityManager->getRepository(Idea::class)->find($ideaId);
+        $status = $entityManager->getRepository(Status::class)->findOneBy(['name' => $newStatus]);
+
+        if (!$idea) {
+            return new Response('Idea not found.', Response::HTTP_NOT_FOUND);
+        }
+
+        // Update idea status
+        $idea->setStatus($status);
+        $entityManager->flush();
+
+        return new Response('Idea status updated successfully.', Response::HTTP_OK);
+    }
+
 }

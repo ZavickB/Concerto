@@ -1,113 +1,103 @@
 {% block modalBody %}
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <h5>{{ idea.title }}</h5>
-                <p>{{ idea.description }}</p>
-                <p><strong>Owner:</strong> {{ idea.owner.username }}</p>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">{{ idea.title }}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <p>{{ idea.description }}</p>
+                        <p><strong>Owner:</strong> {{ idea.owner.username }}</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h6>Comments</h6>
+
+                {% macro renderComments(comments, level) %}
+                    {% for comment in comments %}
+                        {% if level == 0 and comment.parentComment is empty %}
+                            <div class="comment mb-3" style="margin-left: {{ level * 20 }}px; border-left: 3px solid #ccc;" id="comment-{{ comment.id }}">
+                                <div class="comment-header d-flex align-items-center">
+                                    <img src="{{ asset('images/concerto.png') }}" alt="{{ comment.owner.username }}" class="rounded-circle mr-2" style="width: 40px; height: 40px;">
+                                    <div>
+                                        <strong>{{ comment.owner.username }}</strong>
+                                        <span class="text-muted ml-2">{{ comment.postDate|date('F j, Y, H:i') }}</span>
+                                    </div>
+                                </div>
+                                <p>{{ comment.content }}</p>
+                                <div class="d-flex align-items-center">
+                                    <a href="#" class="reply-link text-primary mr-3" data-parent="{{ comment.id }}" data-parent-owner="{{ comment.owner.username }}">
+                                        Reply
+                                    </a>
+                                    {% if comment.childComments is not empty %}
+                                        <button class="btn btn-sm btn-link toggle-replies-btn" data-target="#replies-{{ comment.id }}" data-parent="{{ comment.id }}">
+                                            View {{ comment.childComments|length }} {{ comment.childComments|length == 1 ? 'reply' : 'replies' }}
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                {% if comment.childComments is not empty %}
+                                    <div id="replies-{{ comment.id }}" class="replies collapse"></div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endmacro %}
+
+                {{ _self.renderComments(idea.comments, 0) }}
+
+                <hr>
+
+                <div id="formContainer">
+                    <form id="commentForm" class="mb-3" action="{{ path('comment_add', {'id': idea.id}) }}" method="POST">
+                        {{ form_widget(form._token) }}
+                        {{ form_widget(form.parentComment) }}
+                        <div class="form-group">
+                            <label for="commentContent">Add a Comment:</label>
+                            {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': '3', 'id': 'commentContent'}}) }}
+                        </div>
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelForm" style="display: none;">Cancel</button>
+                            <button type="submit" class="btn btn-primary btn-sm ml-2">Submit</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-        
-        <hr>
-
-        <h5>Comments</h5>
-
-        {% macro renderComments(comments, level) %}
-            {% for comment in comments %}
-                {% if level == 0 and comment.parentComment is empty %}
-                    <div class="comment mb-3" style="margin-left: {{ level * 20 }}px; border-left: 3px solid #ccc;" id="comment-{{ comment.id }}">
-                        <div class="comment-header d-flex align-items-center">
-                            <img src="{{ asset('images/concerto.png') }}" alt="{{ comment.owner.username }}" class="rounded-circle mr-2" style="width: 40px; height: 40px;">
-                            <div>
-                                <strong>{{ comment.owner.username }}</strong>
-                                <span class="text-muted ml-2">{{ comment.postDate|date('F j, Y, H:i') }}</span>
-                            </div>
-                        </div>
-                        <p>{{ comment.content }}</p>
-                        <div class="d-flex align-items-center">
-                            <a href="javascript:void(0);" class="reply-link text-primary mr-3" data-parent="{{ comment.id }}" data-parent-owner="{{ comment.owner.username }}">
-                                Reply
-                            </a>
-                            {% if comment.childComments is not empty %}
-                                <button class="btn btn-sm btn-link toggle-replies-btn" data-target="#replies-{{ comment.id }}" data-parent="{{ comment.id }}">
-                                    View {{ comment.childComments|length }} {{ comment.childComments|length == 1 ? 'reply' : 'replies' }}
-                                </button>
-                            {% endif %}
-                        </div>
-                        {% if comment.childComments is not empty %}
-                            <div id="replies-{{ comment.id }}" class="replies collapse"></div>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endmacro %}
-
-        {{ _self.renderComments(idea.comments, 0) }}
-
-        <hr>
-
-        <div id="formContainer">
-            <form id="commentForm" class="mb-3" action="{{ path('comment_add', {'id': idea.id}) }}" method="POST">
-                {{ form_widget(form._token) }}
-                {{ form_widget(form.parentComment) }}
-                <div class="form-group">
-                    <label for="commentContent">Add a Comment:</label>
-                    {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': '3', 'id': 'commentContent'}}) }}
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-        </div>
     </div>
-
-    <style>
-        .comment {
-            border-left: 2px solid #ccc;
-            padding-left: 15px;
-            padding-bottom: 10px;
-        }
-        .comment-header {
-            margin-bottom: 10px;
-        }
-        .comment-header img {
-            border-radius: 50%;
-        }
-        .comment-header strong {
-            font-weight: bold;
-        }
-        .comment-header .text-muted {
-            color: #6c757d;
-        }
-        .reply-link {
-            font-size: 0.875rem;
-            cursor: pointer;
-        }
-        .reply-form {
-            margin-top: 10px;
-            margin-left: 20px; /* Indent reply form */
-        }
-        .replies {
-            margin-top: 10px;
-            margin-left: 20px;
-        }
-        .toggle-replies-btn {
-            color: #007bff;
-            cursor: pointer;
-        }
-    </style>
 
     <script>
         $(function() {
             // Click event for reply links
-            $(document).on('click', '.reply-link', function() {
+            $(document).on('click', '.reply-link', function(e) {
+                e.preventDefault();
                 var parentId = $(this).data('parent');
                 var parentOwner = $(this).data('parent-owner');
-                console.log("parentOwner : " + parentOwner);
                 $('#comment_parentComment').val(parentId);
                 
                 // Move form under the comment where reply was clicked
                 var commentDiv = $(this).closest('.comment');
                 $('#formContainer').insertAfter(commentDiv);
 
+                // Show cancel button and hide submit button
+                $('#cancelForm').show();
+                $('#commentForm button[type="submit"]');
+            });
+
+            // Click event for cancel button
+            $(document).on('click', '#cancelForm', function() {
+                // Reset form fields if needed
+                $('#commentForm')[0].reset();
+
+                // Move form back to original position
+                $('#formContainer').appendTo('.container'); // Adjust as per your container selector
+                $('#commentForm button[type="submit"]').show();
+                $('#cancelForm').hide();
             });
 
             // Click event for toggle replies buttons
