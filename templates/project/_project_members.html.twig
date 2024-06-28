@@ -2,12 +2,23 @@
 <div class="card">
     <div class="card-header">
         Project Members
+        {% if app.user == project.owner %}
+            <a class="btn-sm btn-link modalbox-invite-member" id="inviteMemberBtn" data-toggle="modal" data-target="#inviteMemberModal" data-content-url="{{ path('project_invite_collaborator', {'id': project.id}) }}">
+                <i class="bi bi-person-add btn-add-member"></i>
+            </a>
+        {% endif %}
     </div>
     <ul class="list-group list-group-flush">
-        <li class="list-group-item h6">{{ project.owner.username|title }}</li>
+        <li class="project-owner list-group-item ">{{ project.owner.username|title }} 👑</li>
 
         {% for member in project.contributors %}
             <li class="list-group-item">{{ member.username|title }}</li>
         {% endfor %}
     </ul>
 </div>
+
+<style scoped>
+    .project-owner{
+        font-weight: bold;
+    }
+</style>

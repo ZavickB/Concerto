@@ -83,6 +83,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $githubId;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $avatar;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $discordId;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
@@ -359,6 +369,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setGithubId(string $githubId): self
     {
         $this->githubId = $githubId;
+
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): self
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getDiscordId(): ?string
+    {
+        return $this->discordId;
+    }
+
+    public function setDiscordId(string $discordId): self
+    {
+        $this->discordId = $discordId;
 
         return $this;
     }

@@ -1,0 +1,45 @@
+{# templates/invitation/accept.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Accept Invitation{% endblock %}
+
+{% block body %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3 class="card-title">Accept Invitation to {{ invitation.project.title }}</h3>
+        </div>
+        <div class="card-body">
+            <p>Welcome to {{ invitation.project.title }}! To get started, please choose one of the following options:</p>
+            
+            {% if existingUser %}
+                <form method="post">
+                    <button type="submit" class="btn btn-primary">Accept Invitation</button>
+                </form>
+            {% else %}
+                <div class="mb-3">
+                    <button type="button" class="btn btn-outline-dark mr-2" id="setPasswordBtn">Set a Password</button>
+                </div>
+
+                <div id="setPasswordForm" style="display: none;">
+                    <form method="post">
+                        <div class="form-group">
+                            <label for="password">Set a Password</label>
+                            <input type="password" id="password" name="password" required class="form-control">
+                            <small class="form-text text-muted">Choose a strong password to secure your account.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Accept Invitation</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('setPasswordBtn').addEventListener('click', function () {
+                document.getElementById('setPasswordForm').style.display = 'block';
+            });
+        });
+    </script>
+{% endblock %}

@@ -46,6 +46,7 @@ class GoogleAuthenticator extends AbstractAuthenticator
 
             $email = $googleUser->getEmail();
             $googleId = $googleUser->getId();
+            $avatarUrl = $googleUser->getAvatar() ?? null;
 
             $user = $this->entityManager->getRepository(User::class)->findOneBy(['googleId' => $googleId]);
 
@@ -64,6 +65,7 @@ class GoogleAuthenticator extends AbstractAuthenticator
 
                 // Liez l'utilisateur existant ou nouvel utilisateur avec le googleId
                 $user->setGoogleId($googleId);
+                $user->setAvatar($avatarUrl);
 
                 if (!$user->getId()) {
                     $newProject = new Project();

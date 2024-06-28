@@ -1,6 +1,8 @@
 security:
     enable_authenticator_manager: true
-    
+    encoders:
+        App\Entity\User:
+            algorithm: auto
     providers:
         app_user_provider:
             entity:
@@ -11,6 +13,7 @@ security:
             custom_authenticators:
                 - App\Security\GoogleAuthenticator
                 - App\Security\GithubAuthenticator
+                - App\Security\DiscordAuthenticator
             logout:
                 path: app_logout
                 target: /

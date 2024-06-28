@@ -1,4 +1,5 @@
-<?php
+<?php 
+// src/Security/DiscordAuthenticator.php
 
 namespace App\Security;
 
@@ -10,17 +11,18 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 
-class GithubAuthenticator extends AbstractAuthenticator
+class DiscordAuthenticator extends AbstractAuthenticator
 {
     private $clientRegistry;
     private $entityManager;
@@ -35,24 +37,26 @@ class GithubAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): ?bool
     {
-        return $request->attributes->get('_route') === 'connect_github_check';
+        return $request->attributes->get('_route') === 'connect_discord_check';
     }
 
     public function authenticate(Request $request): Passport
     {
-        $client = $this->clientRegistry->getClient('github');
+        $client = $this->clientRegistry->getClient('discord');
         $accessToken = $client->getAccessToken();
 
         try {
-            $githubUser = $client->fetchUserFromToken($accessToken);
-           
-            $avatarUrl = $githubUser->toArray()['avatar_url'] ?? null;
+            // Fetch the Discord user from the API
+            $discordUser = $client->fetchUserFromToken($accessToken);
 
-            $email = $githubUser->getEmail();
-            $githubId = $githubUser->getId();
-            $login = $githubUser->getNickname();
+            // Extract user details
+            $discordId = $discordUser->getId();
+            $username = $discordUser->getUsername();
+            $avatarUrl = "https://cdn.discordapp.com/avatars/" . $discordUser->getId() . "/" . $discordUser->getAvatarHash() . ".png";
+            $email = $discordUser->getEmail();
 
-            $user = $this->entityManager->getRepository(User::class)->findOneBy(['githubId' => $githubId]);
+            // Check if the user already exists in your database
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['discordId' => $discordId]);
 
             if (!$user) {
                 // Check if a user with the same email exists
@@ -60,17 +64,15 @@ class GithubAuthenticator extends AbstractAuthenticator
                 if (!$user) {
                     // Generate a random password for new users
                     $randomPassword = sha1(random_bytes(18));
-
+                    
+                    // User does not exist, create a new User entity
                     $user = new User();
-                    $user->setGithubId($githubId);
-                    $user->setEmail($email);
-                    $user->setUsername($login);
+                    $user->setDiscordId($discordId);
+                    $user->setUsername($username);
+                    $user->setAvatar($avatarUrl);
                     $user->setPassword($randomPassword);
                 }
-
-                // Set avatar URL in the User entity
-                $user->setAvatar($avatarUrl);
-
+                
                 $newProject = new Project();
                 $newProject
                     ->setTitle("My first Project")
@@ -83,26 +85,23 @@ class GithubAuthenticator extends AbstractAuthenticator
                 $this->entityManager->flush();
             }
 
-            return new SelfValidatingPassport(new UserBadge($email, function ($userIdentifier) use ($user) {
+            // Return a Passport containing the UserBadge
+            return new SelfValidatingPassport(new UserBadge($discordId, function ($discordId) use ($user) {
                 return $user;
             }));
 
         } catch (IdentityProviderException $e) {
-            throw new CustomUserMessageAuthenticationException('GitHub authentication failed: ' . $e->getMessage());
+            throw new AuthenticationException('Discord authentication failed: ' . $e->getMessage());
         }
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return new RedirectResponse($this->router->generate('dashboard'));
+        return new RedirectResponse($this->router->generate('dashboard')); // Redirect to dashboard or any other route
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        $data = [
-            'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
-        ];
-
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        return new Response('Authentication failed: ' . $exception->getMessage(), Response::HTTP_UNAUTHORIZED);
     }
 }

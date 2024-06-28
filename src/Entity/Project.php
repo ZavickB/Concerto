@@ -55,10 +55,16 @@ class Project
      */
     private $isDelete;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Invitation::class, mappedBy="project")
+     */
+    private $invitations;
+
     public function __construct()
     {
         $this->ideas = new ArrayCollection();
         $this->contributors = new ArrayCollection();
+        $this->invitations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -184,6 +190,36 @@ class Project
     public function setIsDelete(?bool $isDelete): self
     {
         $this->isDelete = $isDelete;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitation>
+     */
+    public function getInvitations(): Collection
+    {
+        return $this->invitations;
+    }
+
+    public function addInvitation(Invitation $invitation): self
+    {
+        if (!$this->invitations->contains($invitation)) {
+            $this->invitations[] = $invitation;
+            $invitation->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitation(Invitation $invitation): self
+    {
+        if ($this->invitations->removeElement($invitation)) {
+            // set the owning side to null (unless already changed)
+            if ($invitation->getProject() === $this) {
+                $invitation->setProject(null);
+            }
+        }
 
         return $this;
     }

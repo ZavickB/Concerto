@@ -1,3 +1,5 @@
+{# templates/magic_link/request.html.twig #}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Dashboard{% endblock %}
@@ -7,37 +9,70 @@
         <div class="container mt-5">
             <!-- Welcome Section -->
             <div class="text-center">
-                <h1>Welcome to Concerto, your ultimate idea conductor!</h1>
+                <h1>Welcome to Concerto, your ultimate idea manager!</h1>
                 <p class="lead mt-3">Concerto helps you manage and develop your ideas efficiently. Connect to get started!</p>
             </div>
-            
+                        
             <!-- Connection Section -->
             <div class="row justify-content-center mt-5">
-                <div class="col-md-6 text-center">
-                    <p>
-                        <a href="{{ path('connect_google') }}" class="btn btn-primary btn-lg mb-3">
-                            <i class="bi bi-google"></i> Connect with Google
-                        </a>
-                    </p>
-                    <p>
-                        <a href="{{ path('connect_github') }}" class="btn btn-secondary btn-lg">
-                            <i class="bi bi-github"></i> Connect with GitHub
-                        </a>
-                    </p>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <a href="{{ path('connect_google') }}" class="btn btn-primary btn-lg btn-block">
+                                <i class="bi bi-google"></i> Connect with Google
+                            </a>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <a href="{{ path('connect_github') }}" class="btn btn-secondary btn-lg btn-block">
+                                <i class="bi bi-github"></i> Connect with GitHub
+                            </a>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <a class="btn btn-yellow btn-lg btn-block" data-toggle="modal" data-target="#magicLinkModal">
+                                <i class="bi bi-magic"></i> Get your Magic Link
+                            </a>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <a href="{{ path('connect_discord') }}" class="btn btn-darkBlue btn-lg btn-block">
+                                <i class="bi bi-discord"></i> Connect with Discord
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Magic Link Modal -->
+            <div class="modal fade" id="magicLinkModal" tabindex="-1" role="dialog" aria-labelledby="magicLinkModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="magicLinkModalLabel">Request Magic Link</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="{{ path('request_magic_link') }}" id="magic-link-form">
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" required class="form-control">
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="submit-btn">Send Magic Link</button>
+                                <div class="loader d-none" id="loader"></div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- About Section -->
             <div class="row mt-5">
                 <div class="col-md-10 offset-md-1">
-                    <div class="card">
+                    <div class="card shadow-sm">
                         <div class="card-body">
-                            <h2>About Concerto</h2>
-                            <p class="mt-3">
+                            <h2 class="text-center mb-4">About Concerto</h2>
+                            <p class="lead text-center">
                                 Concerto is designed to streamline the process of idea management and development. Whether you're an individual brainstorming your next big project or a team collaborating on innovative solutions, Concerto provides the tools you need to track, develop, and bring your ideas to life.
-                            </p>
-                            <p>
-                                With features like project tracking, idea submissions, and status updates, Concerto ensures that no idea is left behind. Connect with your preferred OAuth provider to start managing your ideas today!
                             </p>
                         </div>
                     </div>
@@ -46,10 +81,9 @@
         </div>
     {% else %}
         <div class="container">
-            <h1>Welcome, {{ app.user.username|title }}</h1>
-            <div class="row mt-4">
+            <div class="row mt-5">
                 <div class="col">
-                    <h2>Dashboard</h2>
+                    <h1>Welcome, {{ app.user.username|title }}</h1>
                 </div>
                 <div class="col text-right">
                     <button class="btn btn-secondary modalbox-project" data-toggle="modal" data-target="#projectModal" data-content-url="{{ path('project_new') }}">
@@ -57,31 +91,102 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Personal Projects Section -->
             <div class="row mt-4">
-                {% for project in projects %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card project-card clickable-card">
-                            <a href="{{ path('project_view', {'id': project.id}) }}" class="card-link">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ project.title|capitalize }}</h5>
-                                    <p class="card-text">{{ project.description|capitalize }}</p>
+                <div class="col">
+                    <h3 class="mb-3 col-md-4">
+                        Personal Projects
+                        <span class="toggle-section float-right" data-toggle="collapse" data-target="#personalProjects" aria-expanded="true" aria-controls="personalProjects">
+                            <i class="bi bi-chevron-up"></i>
+                        </span>
+                    </h3>
+                    <div class="collapse show" id="personalProjects">
+                        <div class="row mt-3">
+                            {% for project in projects %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card shadow-sm project-card">
+                                        <a href="{{ path('project_view', {'id': project.id}) }}" class="card-link">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ project.title|capitalize }}</h5>
+                                                <p class="card-text text-muted">{{ project.description }}</p>
+                                            </div>
+                                        </a>
+                                    </div>
                                 </div>
-                            </a>
+                            {% endfor %}
                         </div>
                     </div>
-                {% endfor %}
+                </div>
+            </div>
+
+            <!-- Shared Projects Section -->
+            <div class="row mt-4">
+                <div class="col">
+                    <h3 class="mb-3 col-md-4">
+                        Shared Projects
+                        <span class="toggle-section float-right" data-toggle="collapse" data-target="#sharedProjects" aria-expanded="true" aria-controls="sharedProjects">
+                            <i class="bi bi-chevron-up"></i>
+                        </span>
+                    </h3>
+                    <div class="collapse show" id="sharedProjects">
+                        <div class="row mt-3">
+                            {% for collab in collabs %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card shadow-sm project-card">
+                                        <a href="{{ path('project_view', {'id': collab.id}) }}" class="card-link">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ collab.title|capitalize }}</h5>
+                                                <p class="card-text text-muted">{{ collab.description }}</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     {% endif %}
 
-    <!-- Project Modal -->
-    <div class="modal fade" id="projectModal" tabindex="-1" role="dialog" aria-labelledby="projectModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div id="projectModalContent"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <style>
+        .project-card {
+            height: 100%;
+        }
+
+        .project-card .card-body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    </style>
+    
+    <script>
+        // Toggle arrow icons for collapsible sections using jQuery
+        $(document).ready(function () {
+            console.log("Document ready");
+
+            $('.toggle-section').click(function () {
+                console.log("Toggle section clicked");
+                
+                var icon = $(this).find('i');
+                if (icon.hasClass('bi-chevron-up')) {
+                    console.log("Changing icon from up to down");
+                    icon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+                } else {
+                    console.log("Changing icon from down to up");
+                    icon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
+                }
+            });
+
+            // Handle form submission to show loader
+            $('#magic-link-form').submit(function () {
+                $('#submit-btn').attr('disabled', 'disabled'); // Disable submit button
+                $('#loader').removeClass('d-none'); // Show loader
+            });
+        });
+    </script>
+    
 {% endblock %}

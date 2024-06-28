@@ -39,13 +39,19 @@ $(document).ready(function() {
         openModal('#editIdeaModal', contentUrl, '#editIdeaModalContent');
     });
 
+    $('.modalbox-invite-member').on('click', function(event) {
+        event.preventDefault();
+        var contentUrl = $(this).data('content-url');
+        openModal('#inviteMemberModal', contentUrl, '#inviteMemberModalContent');
+    });
+
     // Ensure only one modal is shown at a time
     $('.modal').on('hidden.bs.modal', function() {
         $(this).modal('hide');
     });
 
     // Handle form submission inside modals
-    $('#ideaModal, #commentsModal, #editProjectModal, #editIdeaModal').on('submit', 'form', function(event) {
+    $('#ideaModal, #commentsModal, #editProjectModal, #editIdeaModal, #inviteMemberModal').on('submit', 'form', function(event) {
         event.preventDefault();
         
         var form = $(this);

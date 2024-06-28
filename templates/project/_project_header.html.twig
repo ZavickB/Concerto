@@ -2,12 +2,14 @@
     <div class="col-md-8">
         <div class="d-flex align-items-center mb-2">
             <h1 class="mr-3">{{ project.title|capitalize }}</h1>
-            <button type="button" class="btn btn-outline-secondary modalbox-edit-project mr-3" id="editProjectBtn" data-toggle="modal" data-target="#modal" data-content-url="{{ path('project_edit', {'id': project.id}) }}">
-                <i class="bi bi-pencil-square"></i> Edit
-            </button>
-            <button type="button" class="btn btn-outline-danger" id="deleteProjectBtn" data-project-id="{{ project.id }}">
-                <i class="bi bi-trash"></i> Delete
-            </button>
+            {% if app.user == project.owner %}
+                <button type="button" class="btn btn-outline-secondary modalbox-edit-project mr-3" id="editProjectBtn" data-toggle="modal" data-target="#modal" data-content-url="{{ path('project_edit', {'id': project.id}) }}">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </button>
+                <button type="button" class="btn btn-outline-danger" id="deleteProjectBtn" data-project-id="{{ project.id }}">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            {% endif %}
         </div>
         <p>{{ project.description|capitalize }}</p>
     </div>
