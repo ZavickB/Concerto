@@ -30,7 +30,8 @@ class ProjectController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $project->setOwner($this->getUser());
+            $user = $this->getUser();
+            $project->setOwner($user);
             $project->setStartDate(new \DateTime());
 
             $entityManager->persist($project);
@@ -60,6 +61,18 @@ class ProjectController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route("/projects/{id}", name="project_delete", methods={"DELETE"})
+     */
+    public function delete($id, Request $request,  EntityManagerInterface $entityManager): Response
+    {
+        $project = $entityManager->getRepository(Project::class)->find($id);
+        $project->setIsDelete(true);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('dashboard');
+    }
+    
     /**
      * @Route("/projects/{id}/edit", name="project_edit", methods={"GET", "POST"})
      */
@@ -127,9 +140,11 @@ class ProjectController extends AbstractController
              );
         }
 
-        return $this->render('idea/new.html.twig', [
+        return $this->render('idea/_form.html.twig', [
             'form' => $form->createView(), // Passer l'objet FormView à la vue
-            'project' => $project
+            'project' => $project,
+            'form_action' => $this->generateUrl('project_add_idea', ['id' => $project->getId()])
+
         ]);
     }
 

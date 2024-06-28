@@ -48,6 +48,7 @@ class GithubAuthenticator extends AbstractAuthenticator
 
             $email = $githubUser->getEmail();
             $githubId = $githubUser->getId();
+            $login = $githubUser->getNickname();
 
             $user = $this->entityManager->getRepository(User::class)->findOneBy(['githubId' => $githubId]);
 
@@ -61,13 +62,13 @@ class GithubAuthenticator extends AbstractAuthenticator
                     $user = new User();
                     $user->setGithubId($githubId);
                     $user->setEmail($email);
-                    $user->setUsername($githubUser->getName());
+                    $user->setUsername($login);
                     $user->setPassword($random);
                 }
 
                 $newProject = new Project();
                 $newProject
-                    ->setTitle("Your first Project")
+                    ->setTitle("My first Project")
                     ->setDescription("This is a simple description of your first project")
                     ->setOwner($user)
                     ->setStartDate(new \DateTime());

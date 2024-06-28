@@ -19,9 +19,16 @@
     --color-border-done: #28a745; /* Green */
 }
 
+@font-face {
+    font-family: 'Urbanist';
+    src: url('./fonts/Urbanist-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
 /* Global styles */
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Urbanist', sans-serif;
     color: var(--color-text);
     margin: 0;
     padding: 0;

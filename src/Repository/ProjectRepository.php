@@ -39,19 +39,38 @@ class ProjectRepository extends ServiceEntityRepository
         }
     }
 
-
-    public function findProjectWithIdeasAndContributors($id)
+    public function findUserCollabs($id)
     {
         return $this->createQueryBuilder('p')
             ->leftJoin('p.ideas', 'i')
             ->leftJoin('i.comments', 'c') // Left join comments of ideas
             ->leftJoin('p.contributors', 'contrib')
-            ->where('p.id = :id')
+            ->where('contrib.id = :id') // Change this to match the correct column for contributors
             ->setParameter('id', $id)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getResult();
     }
 
+    // public function findProjectWithIdeasAndContributors($id)
+    // {
+    //     return $this->createQueryBuilder('p')
+    //         ->leftJoin('p.ideas', 'i')
+    //         ->leftJoin('i.comments', 'c') // Left join comments of ideas
+    //         ->leftJoin('p.contributors', 'contrib')
+    //         ->where('p.id = :id')
+    //         ->setParameter('id', $id)
+    //         ->getQuery()
+    //         ->getOneOrNullResult();
+    // }
+
+    public function findNonDeleted(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isDelete = :val')
+            ->setParameter('val', false)
+            ->getQuery()
+            ->getResult();
+    }
 
 //    /**
 //     * @return Project[] Returns an array of Project objects

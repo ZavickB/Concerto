@@ -39,6 +39,16 @@ class IdeaRepository extends ServiceEntityRepository
         }
     }
 
+    public function findNonDeleted(): array
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('i.isDelete = :val')
+            ->setParameter('val', false)
+            ->getQuery()
+            ->getResult();
+    }
+    
+
 //    /**
 //     * @return Idea[] Returns an array of Idea objects
 //     */

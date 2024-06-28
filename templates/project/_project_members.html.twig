@@ -4,8 +4,10 @@
         Project Members
     </div>
     <ul class="list-group list-group-flush">
+        <li class="list-group-item h6">{{ project.owner.username|title }}</li>
+
         {% for member in project.contributors %}
-            <li class="list-group-item">{{ member.username }}</li>
+            <li class="list-group-item">{{ member.username|title }}</li>
         {% endfor %}
     </ul>
 </div>

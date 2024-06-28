@@ -68,8 +68,7 @@ class GoogleAuthenticator extends AbstractAuthenticator
                 if (!$user->getId()) {
                     $newProject = new Project();
                     $newProject
-                        ->addContributor($user)
-                        ->setTitle("Your first Project")
+                        ->setTitle("My first Project")
                         ->setDescription("This is a simple description of your first project")
                         ->setOwner($user)
                         ->setStartDate(new \DateTime());

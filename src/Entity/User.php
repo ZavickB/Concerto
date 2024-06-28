@@ -282,7 +282,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getProjects(): Collection
     {
-        return $this->projects;
+        $projects = new ArrayCollection();
+        
+        foreach ($this->projects as $project) {
+            if ($project->isIsDelete() === false || $project->isIsDelete() === null) {
+                $projects->add($project);
+            }
+        }
+
+        return $projects;
     }
 
     public function addProject(Project $project): self

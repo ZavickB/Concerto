@@ -50,6 +50,11 @@ class Project
      */
     private $startDate;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isDelete;
+
     public function __construct()
     {
         $this->ideas = new ArrayCollection();
@@ -90,7 +95,15 @@ class Project
      */
     public function getIdeas(): Collection
     {
-        return $this->ideas;
+        $ideas = new ArrayCollection();
+        
+        foreach ($this->ideas as $idea) {
+            if ($idea->isIsDelete() === false || $idea->isIsDelete() === null) {
+                $ideas->add($idea);
+            }
+        }
+
+        return $ideas;
     }
 
     public function addIdea(Idea $idea): self
@@ -159,6 +172,18 @@ class Project
     public function setStartDate(\DateTimeInterface $startDate): self
     {
         $this->startDate = $startDate;
+
+        return $this;
+    }
+
+    public function isIsDelete(): ?bool
+    {
+        return $this->isDelete;
+    }
+
+    public function setIsDelete(?bool $isDelete): self
+    {
+        $this->isDelete = $isDelete;
 
         return $this;
     }

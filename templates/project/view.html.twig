@@ -7,9 +7,9 @@
     <div class="row mt-4">
         {% for status, status_label in {'to-do': 'To Do', 'in-progress': 'In Progress', 'done': 'Done'} %}
             <div class="col-md-4 ">
-                <div class="card mb-4 border-left-{{ status }} card-column" data-status="{{status}}">
+                <div class="card mb-4 border-left-{{ status }} card-column" data-status="{{status}}" data-url="{{path('update_idea_status')}}">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="card-title">{{ status_label }}</h4>
+                        <h4 class="card-title">{{ status_label|capitalize }}</h4>
                         <a href="#" class="modalbox btn btn-secondary btn-sm"
                             data-toggle="modal"
                             data-target="#ideaModal"
@@ -55,47 +55,17 @@
         </div>
     </div>
 
+    <div class="modal fade" id="editIdeaModal" tabindex="-1" role="dialog" aria-labelledby="editIdeaModalContent" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body" id="editIdeaModalContent">
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script>
-$(function() {
-    $('.idea-card').draggable({
-        revert: 'invalid',
-        helper: 'clone',
-        zIndex: 100
-    });
-
-    $('.card-column').droppable({
-        accept: '.idea-card',
-        drop: function(event, ui) {
-            var card = ui.draggable;
-            var ideaId = card.attr('id').replace('idea-', '');
-            var newStatus = $(this).data('status');
-
-            // Update status via AJAX
-            $.ajax({
-                url: "{{ path('update_idea_status') }}", // Adjust as per your route
-                method: 'PATCH',
-                data: {
-                    ideaId: ideaId,
-                    newStatus: newStatus
-                },
-                success: function(response) {
-                    // Optionally handle success response
-                },
-                error: function(xhr, status, error) {
-                    // Optionally handle error
-                    console.error('Error:', error);
-                }
-            });
-
-            // Change card's status visually
-            card.appendTo($(this).find('.card-body'));
-
-        }
-    });
-});
-
-
+    var updateIdeaStatusUrl = "{{ path('update_idea_status') }}";
 </script>
 
 {% endblock %}

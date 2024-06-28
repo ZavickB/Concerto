@@ -4,13 +4,16 @@ namespace App\Controller;
 
 use App\Entity\Idea;
 use App\Entity\Status;
+use App\Form\IdeaType;
 use App\Entity\Comment;
 use App\Form\CommentType;
 use App\Repository\IdeaRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -19,18 +22,49 @@ class IdeaController extends AbstractController
     /**
      * @Route("/idea/{id}/edit", name="idea_edit")
      */
-    public function editIdea($id, IdeaRepository $ideaRepository): Response
+    public function edit($id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        $idea = $ideaRepository->find($id);
+        $idea = $entityManager->getRepository(Idea::class)->find($id);
 
-        if (! $idea || $idea->getOwner() !== $this->getUser()) {
-            throw new AccessDeniedException("You're not the owner of this idea, you can't edit it!");
+        // Handle the case where the project is not found
+        if (!$idea) {
+            throw $this->createNotFoundException('The project does not exist');
+        }
+        $project = $idea->getProject();
+
+        // Create a form to handle the submission
+        $form = $this->createForm(IdeaType::class, $idea);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            // Redirect back to the project view or handle as needed
+            return $this->redirectToRoute('project_view', ['id' => $project->getId()]);
         }
 
-        // Handle idea editing logic here
+        return $this->render('idea/_form.html.twig', [
+            'project' => $project,
+            'form' => $form->createView(),
+            'form_action' => $this->generateUrl('idea_edit', ['id' => $idea->getId()]),
+            'idea' => $idea 
+        ]);
+    }
 
-        // Example: return a response or redirect
-        return $this->redirectToRoute('project_view', ['id' => $idea->getProject()->getId()]);
+    /**
+     * @Route("/idea/{id}", name="idea_delete", methods={"DELETE"})
+     */
+    public function delete($id, Request $request,  EntityManagerInterface $entityManager)
+    {
+        $idea = $entityManager->getRepository(Idea::class)->find($id);
+        if (!$idea) {
+            return new JsonResponse(['error' => 'Idea not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $idea->setIsDelete(true);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
     }
 
     /**
@@ -93,19 +127,23 @@ class IdeaController extends AbstractController
     }
 
     /**
-     * @Route("/update-idea-status", name="update_idea_status", methods={"PATCH"})
+     * @Route("/update-idea-status", name="update_idea_status", methods={"POST"})
      */
-    public function updateIdeaStatus(Request $request): Response
+    public function updateIdeaStatus(Request $request, EntityManagerInterface $entityManager): Response
     {
         $ideaId = $request->request->get('ideaId');
         $newStatus = $request->request->get('newStatus');
-        
-        $entityManager = $this->getDoctrine()->getManager();
-        $idea = $entityManager->getRepository(Idea::class)->find($ideaId);
-        $status = $entityManager->getRepository(Status::class)->findOneBy(['name' => $newStatus]);
 
+        // Fetch the Idea entity
+        $idea = $entityManager->getRepository(Idea::class)->find($ideaId);
         if (!$idea) {
             return new Response('Idea not found.', Response::HTTP_NOT_FOUND);
+        }
+
+        // Fetch the Status entity
+        $status = $entityManager->getRepository(Status::class)->findOneBy(['name' => $newStatus]);
+        if (!$status) {
+            return new Response('Status not found.', Response::HTTP_NOT_FOUND);
         }
 
         // Update idea status

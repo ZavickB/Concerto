@@ -67,6 +67,11 @@ class Idea
      */
     private $comments;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isDelete;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
@@ -212,6 +217,18 @@ class Idea
                 $comment->setIdea(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isIsDelete(): ?bool
+    {
+        return $this->isDelete;
+    }
+
+    public function setIsDelete(?bool $isDelete): self
+    {
+        $this->isDelete = $isDelete;
 
         return $this;
     }
